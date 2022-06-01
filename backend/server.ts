@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import express from "express";
 
-//import { services } from "./services";
+import { services } from "./services";
 
 const app = express();
 
@@ -12,8 +12,12 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+app.get("/", (req, res) => {
+  res.send("Server is up Capt3n!");
+});
+
 // Mount REST on /api
-//app.use("/api", services);
+app.use("/api", services);
 
 const port = process.env.PORT || 8000;
 
