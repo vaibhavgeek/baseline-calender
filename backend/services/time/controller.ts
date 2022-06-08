@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 //import { User } from "../../models/user.model";
 import { Time } from "../../models/time.model";
+import { Op } from "sequelize";
 
 // Create time availablity for the user
 export const create = (req: Request, res: Response, next: NextFunction) => {
@@ -50,4 +51,17 @@ export const update = (req: Request, res: Response, next: NextFunction) => {
     });
   }
   return Time.bulkCreate(times, { updateOnDuplicate: ["id"] });
+};
+// Get all available times for a person
+export const get = async (req: Request, res: Response, next: NextFunction) => {
+  if ((req as any).user.payload.id !== +req.params.userId) {
+    return res.status(401).send({ error: "You can can only access yourself" });
+  }
+  return Time.findAll({
+    where: {
+      userId: {
+        [Op.eq]: req.params.userId,
+      },
+    },
+  });
 };
