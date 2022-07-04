@@ -8,4 +8,4 @@ export const appointmentsRouter = express.Router();
 appointmentsRouter.route("/").post(controller.create);
 
 /** GET /api/appointments */
-appointmentsRouter.route("/:userId").get(controller.get);
+//appointmentsRouter.route("/:userId").get(controller.get);

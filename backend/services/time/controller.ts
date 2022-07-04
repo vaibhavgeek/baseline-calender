@@ -4,64 +4,72 @@ import { Time } from "../../models/time.model";
 import { Op } from "sequelize";
 
 // Create time availablity for the user
-export const create = (req: Request, res: Response, next: NextFunction) => {
-  if ((req as any).user.payload.id !== +req.params.userId) {
+export const create = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if ((req as any).user.payload.id !== +req.body.userId) {
     return res.status(401).send({ error: "You can can only access yourself" });
   }
-  const timestarts = (req as any).time.start;
-  const timeends = (req as any).time.ends;
-  if ((req as any).timestarts.length !== (req as any).timeends.length) {
+  const { timeStarts, timeEnds, userId } = req.body;
+  if (timeStarts.length !== timeEnds.length) {
     return res
       .status(400)
       .send({ error: "Something went wrong! Please contact developer" });
   }
   const times = [];
-  for (let i = 0; i < timestarts.length; i++) {
+  for (let i = 0; i < timeStarts.length; i++) {
     times.push({
-      timestart: timestarts[i],
-      timeend: timeends[i],
-      userId: req.params.userId,
+      timestart: timeStarts[i],
+      timeend: timeEnds[i],
+      userId: userId,
       status: "available",
     });
   }
-  return Time.bulkCreate(times);
+  const timejson = await Time.bulkCreate(times);
+  return res.status(200).send(timejson);
 };
 
 // update time availability for the user.
-export const update = (req: Request, res: Response, next: NextFunction) => {
+export const update = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if ((req as any).user.payload.id !== +req.params.userId) {
     return res.status(401).send({ error: "You can can only access yourself" });
   }
-  const ids = (req as any).time.ids;
-  const timestarts = (req as any).time.start;
-  const timeends = (req as any).time.ends;
-  if ((req as any).timestarts.length !== (req as any).timeends.length) {
+  const { ids, timeStarts, timeEnds } = req.body;
+  if ((req as any).timeStarts.length !== (req as any).timeEnds.length) {
     return res
       .status(400)
       .send({ error: "Something went wrong! Please contact developer" });
   }
   const times = [];
-  for (let i = 0; i < timestarts.length; i++) {
+  for (let i = 0; i < timeStarts.length; i++) {
     times.push({
       id: ids[i],
-      timestart: timestarts[i],
-      timeend: timeends[i],
+      timestart: timeStarts[i],
+      timeend: timeEnds[i],
       userId: req.params.userId,
       status: "available",
     });
   }
-  return Time.bulkCreate(times, { updateOnDuplicate: ["id"] });
+  const timejson = await Time.bulkCreate(times, { updateOnDuplicate: ["id"] });
+  return res.status(200).send(timejson);
 };
 // Get all available times for a person
 export const get = async (req: Request, res: Response, next: NextFunction) => {
   if ((req as any).user.payload.id !== +req.params.userId) {
     return res.status(401).send({ error: "You can can only access yourself" });
   }
-  return Time.findAll({
+  const times = await Time.findAll({
     where: {
       userId: {
         [Op.eq]: req.params.userId,
       },
     },
   });
+  return res.status(200).send(times);
 };
